@@ -15,11 +15,15 @@ Use ``pip`` for installing:
 Usage
 -----
 
-Once installed, you can activate ``abm`` by importing ``abm.activate``::
+Once installed, you can activate ``abm`` by importing ``abm.activate``:
+
+.. code-block:: python
 
     from abm import activate
 
-Finally, you can register new loaders by doing::
+Finally, you can register new loaders by doing:
+
+.. code-block:: python
 
     from abm.loaders import IniLoader
     IniLoader.register()
@@ -48,7 +52,9 @@ Writing a loader
 
 Extend the base loader ``AbmLoader`` provided in ``abm.loaders`` and implement
 ``create_module`` and ``execute_module`` methods. Provide the ``extension``
-class member to allow automatic registration::
+class member to allow automatic registration:
+
+.. code-block:: python
 
     import json
     from types import ModuleType
@@ -80,17 +86,21 @@ class member to allow automatic registration::
             dict.__init__(self)
 
 
-Loaders are initialized passing the name of the module in the form::
+Loaders are initialized passing the name of the module in the form:
+
+.. code-block:: python
 
     'path.to.the.module'
 
 And its absolute path.
 
-Remember registering the loader with::
+Remember registering the loader with:
+
+.. code-block:: python
 
     JsonLoader.register()
 
-After activating ``amb``.
+After activating ``abm``.
 
 Implementing ``create_module``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -102,7 +112,9 @@ the module.
 A good pattern is to create a new type of module combining the functionality
 of Python default modules and your specific needs. In the JSON example,
 instances of ``JsonModule`` combines the functionality of standard modules
-(``ModuleType``) and dictionaries::
+(``ModuleType``) and dictionaries:
+
+.. code-block:: python
 
     class JsonModule(ModuleType, dict):
 
@@ -111,7 +123,9 @@ instances of ``JsonModule`` combines the functionality of standard modules
             dict.__init__(self)
 
 
-``create_module`` instances and initializes the module::
+``create_module`` instances and initializes the module:
+
+.. code-block:: python
 
     def create_module(self, spec)
         module = JsonModule(spec.name)
@@ -122,7 +136,9 @@ Implementing ``execute_module``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``execute_module`` function should contain the code for loading the contents
-of the module::
+of the module:
+
+.. code-block:: python
 
     def execute_module(self, module):
         module.clear()
@@ -146,7 +162,9 @@ extensions with new loaders.
 
 In the spirit of ``sys.path_hooks`` and other extension hooks, activating
 ``abm`` will expose a dictionary in ``sys.abm_hooks`` to register new loaders
-dynamically. For instance::
+dynamically. For instance:
+
+.. code-block:: python
 
     import sys
     from abm.loaders import IniLoader
