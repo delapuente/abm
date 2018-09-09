@@ -65,10 +65,10 @@ class member to allow automatic registration:
 
         extension = '.json'
 
-        deg __init__(self, name, path):
+        def __init__(self, name, path):
             self.file_path = path
 
-        def create_module(self, spec)
+        def create_module(self, spec):
             module = JsonModule(spec.name)
             self.init_module_attrs(spec, module)
             return module
