@@ -1,7 +1,7 @@
 ``abm`` - Abstract modules
 ==========================
 
-> Allow loading non Python module formats as modules.
+    Allow loading non Python module formats as modules.
 
 Install
 -------
