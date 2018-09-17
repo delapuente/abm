@@ -21,14 +21,14 @@ Once installed, you can activate ``abm`` by importing ``abm.activate``:
 
     from abm import activate
 
-Finally, you can register new loaders by doing:
+Now you can register new loaders by doing:
 
 .. code-block:: python
 
     from abm.loaders import IniLoader
     IniLoader.register()
 
-Now you can load ``*.ini`` files as if they were modules:
+Since now, you can load ``*.ini`` files as if they were modules:
 
 .. code-block:: ini
 
