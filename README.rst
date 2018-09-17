@@ -56,34 +56,33 @@ class member to allow automatic registration:
 
 .. code-block:: python
 
-    import json
+    import configparser
     from types import ModuleType
     from abm.loaders import AbmLoader
 
 
-    class JsonLoader(AbmLoader):
+    class IniLoader(AbmLoader):
 
-        extension = '.json'
+        extensions = ('.ini', )
 
         def __init__(self, name, path):
             self.file_path = path
 
         def create_module(self, spec):
-            module = JsonModule(spec.name)
+            module = ConfigModule(spec.name)
             self.init_module_attrs(spec, module)
             return module
 
-        def execute_module(self, module):
-            module.clear()
-            module.update(json.load(open(self.file_path)))
+        def exec_module(self, module):
+            module.read(self.file_path)
             return module
 
 
-    class JsonModule(ModuleType, dict):
+    class ConfigModule(ModuleType, ConfigParser):
 
         def __init__(self, specname):
             ModuleType.__init__(self, specname)
-            dict.__init__(self)
+            ConfigParser.__init__(self)
 
 
 Loaders are initialized passing the name of the module in the form:
@@ -94,41 +93,17 @@ Loaders are initialized passing the name of the module in the form:
 
 And its absolute path.
 
-Remember registering the loader with:
-
-.. code-block:: python
-
-    JsonLoader.register()
-
-After activating ``abm``.
-
 Implementing ``create_module``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``create_module`` function should produce a module of the correct type. Nothing
 more. This method is passed with the module specification object used to find
-the module.
-
-A good pattern is to create a new type of module combining the functionality
-of Python default modules and your specific needs. In the JSON example,
-instances of ``JsonModule`` combines the functionality of standard modules
-(``ModuleType``) and dictionaries:
-
-.. code-block:: python
-
-    class JsonModule(ModuleType, dict):
-
-        def __init__(self, specname):
-            ModuleType.__init__(self, specname)
-            dict.__init__(self)
-
-
-``create_module`` instances and initializes the module:
+the module:
 
 .. code-block:: python
 
     def create_module(self, spec)
-        module = JsonModule(spec.name)
+        module = ConfigModule(spec.name)
         self.init_module_attrs(spec, module)
         return module
 
@@ -141,8 +116,7 @@ of the module:
 .. code-block:: python
 
     def execute_module(self, module):
-        module.clear()
-        module.update(json.load(open(self.file_path)))
+        module.read(self.file_path)
         return module
 
 A good tip for determining how to implement this method is imagining you

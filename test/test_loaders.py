@@ -7,7 +7,7 @@ from unittest import TestCase, main
 from contextlib import suppress
 
 from abm.core import HOOK_NAME, activate as activate_abm
-from abm.loaders import AbmLoader, IniLoader
+from abm.loaders import AbmLoader, IniLoader, JsonLoader
 
 
 class TestBaseAbmLoaderClass(TestCase):
@@ -19,7 +19,7 @@ class TestBaseAbmLoaderClass(TestCase):
 
     def test_register_without_activating(self):
         """Registering raises."""
-        delattr(sys, HOOK_NAME)  # desactivate abm
+        delattr(sys, HOOK_NAME)  # deactivate abm
         with self.assertRaises(AttributeError):
             DummyLoader.register()
 
@@ -40,12 +40,13 @@ class TestBaseAbmLoaderClass(TestCase):
     def test_register_with_another_extension(self):
         """Registering for another extension is possible."""
         DummyLoader.register()
-        DummyLoader.register(extension='.example2')
+        DummyLoader.register(extensions=('.example2', ))
         self.assertIs(getattr(sys, HOOK_NAME)['.example2'], DummyLoader)
 
 
 class TestIniLoader(TestCase):
-    """Check the features of modules loaded by the `abm.loaders.IniLoader`."""
+    """Check the features of modules loaded by the
+    ``abm.loaders.IniLoader`` loader."""
 
     def setUp(self):
         _disable_abm()
@@ -61,8 +62,39 @@ class TestIniLoader(TestCase):
         self.assertEqual(config['example']['config-option'], 'config-value')
 
 
+class TestJsonLoader(TestCase):
+    """Check the features of modules loaded by the
+    ``abm.loaders.JsonLoader`` loader."""
+
+    def setUp(self):
+        _disable_abm()
+        activate_abm()
+        JsonLoader.register()
+
+    def test_loads_a_non_object_json_file(self):
+        """The data will be available through the ``_data`` member."""
+        from test.resources import simple_json
+        self.assertEqual(simple_json._data, 'test')
+
+    def test_loads_an_array_json_file(self):
+        """The data will be available through the ``_data`` and the
+        module can be accessed as a mutable sequence."""
+        from test.resources import array_json
+        self.assertEqual(array_json._data, [1, 2, 3])
+        self.assertEqual(len(array_json), 3)
+        self.assertEqual(array_json[0], 1)
+
+    def test_load_an_object_json_file(self):
+        """The data will be available through the ``_data`` and the
+        module can be accessed as a mutable map."""
+        from test.resources import object_json
+        self.assertEqual(object_json._data, {'answer': 42})
+        self.assertEqual(len(object_json), 1)
+        self.assertEqual(object_json['answer'], 42)
+
+
 class DummyLoader(AbmLoader):
-    extension = '.example'
+    extensions = ('.example', )
 
 
 def _disable_abm():
