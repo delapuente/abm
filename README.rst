@@ -56,7 +56,7 @@ class member to allow automatic registration:
 
 .. code-block:: python
 
-    import configparser
+    from configparser import ConfigParser
     from types import ModuleType
     from abm.loaders import AbmLoader
 
