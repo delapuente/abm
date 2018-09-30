@@ -1,4 +1,4 @@
-from distutils.code import setup
+from distutils.core import setup
 
 setup(
   name='abm',
@@ -8,7 +8,7 @@ setup(
   author_email='salva@unoyunodiez.com',
   url='https://github.com/delapuente/abm',
   packages=['abm'],
-  long_description=open('README').read(),
+  long_description=open('README.rst').read(),
   keywords=['abstract', 'module', 'import'],
   classifiers=[
     'Development Status :: 3 - Alpha',
