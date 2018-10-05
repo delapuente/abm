@@ -1,13 +1,16 @@
 """This module test the loaders coming with the `abm` package."""
 
 import sys
-from types import ModuleType
-from configparser import ConfigParser
+import unittest
 from unittest import TestCase, main
 from contextlib import suppress
 
 from abm.core import HOOK_NAME, activate as activate_abm
 from abm.loaders import AbmLoader, IniLoader, JsonLoader
+try:
+    from abm.loaders.image import ImageLoader
+except ImportError:
+    ImageLoader = None
 
 
 class TestBaseAbmLoaderClass(TestCase):
@@ -40,7 +43,7 @@ class TestBaseAbmLoaderClass(TestCase):
     def test_register_with_another_extension(self):
         """Registering for another extension is possible."""
         DummyLoader.register()
-        DummyLoader.register(extensions=('.example2', ))
+        DummyLoader.register(extensions=('.example2',))
         self.assertIs(getattr(sys, HOOK_NAME)['.example2'], DummyLoader)
 
 
@@ -56,10 +59,9 @@ class TestIniLoader(TestCase):
     def test_loads_a_config_file(self):
         """Loads and read a config file as a module."""
         from test.resources import config
-        self.assertIsInstance(config, ModuleType)
-        self.assertIsInstance(config, ConfigParser)
-        self.assertIsNotNone(config['example'])
-        self.assertEqual(config['example']['config-option'], 'config-value')
+        self.assertIsInstance(config, type(sys))
+        self.assertIsNotNone(config.example)
+        self.assertEqual(config.example.config_option, 'config-value')
 
 
 class TestJsonLoader(TestCase):
@@ -93,13 +95,31 @@ class TestJsonLoader(TestCase):
         self.assertEqual(object_json['answer'], 42)
 
 
+@unittest.skipUnless(ImageLoader, 'ImageLoader is not available')
+class TestImageLoader(TestCase):
+    """Check the features of modules loaded by the
+    ``abm.loaders.images.ImageLoader`` loader."""
+
+    def setUp(self):
+        _disable_abm()
+        activate_abm()
+        ImageLoader.register()
+
+    def test_load_an_object_json_file(self):
+        """Raw data should be available through the ``data`` attribute and
+        EXIF metadata should be available through properties."""
+        from test.resources import malaga
+        self.assertEqual(len(malaga.data), 5018112)
+        self.assertEqual(malaga.Model, 'iPhone 4')
+
 class DummyLoader(AbmLoader):
-    extensions = ('.example', )
+    extensions = ('.example',)
 
 
 def _disable_abm():
     with suppress(AttributeError):
         delattr(sys, HOOK_NAME)
+
 
 if __name__ == '__main__':
     main(verbosity=2)

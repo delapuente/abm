@@ -3,13 +3,15 @@
 import sys
 import json
 from collections import MutableMapping, MutableSequence
-from types import ModuleType
+from types import ModuleType, SimpleNamespace
 from configparser import ConfigParser
+# noinspection PyProtectedMember
 from importlib._bootstrap import _init_module_attrs
 from importlib.abc import Loader
 from abm.core import HOOK_NAME
 
 
+# noinspection PyAbstractClass
 class AbmLoader(Loader):
     """Base class for helping implement loaders for non-python files."""
 
@@ -44,7 +46,12 @@ class IniLoader(AbmLoader):
         self.file_path = path
 
     def exec_module(self, module):
-        module.read(self.file_path)
+        config_parser = ConfigParser()
+        config_parser.read(self.file_path)
+        for section_name, section in config_parser.items():
+            namespace = SimpleNamespace(**section)
+            setattr(module, section_name, namespace)
+
         return module
 
     def create_module(self, spec):
@@ -53,14 +60,13 @@ class IniLoader(AbmLoader):
         return module
 
 
-class ConfigModule(ModuleType, ConfigParser):
+class ConfigModule(ModuleType):
     """Represent both a module and a configuration ini file. All methods of
     ``configparser.ConfigParser`` are available for the instances of this
     class."""
 
-    def __init__(self, specname):
-        ModuleType.__init__(self, specname)
-        ConfigParser.__init__(self)
+    def __init__(self, spec_name):
+        ModuleType.__init__(self, spec_name)
 
 
 class JsonLoader(AbmLoader):

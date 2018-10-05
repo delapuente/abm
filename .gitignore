@@ -6,3 +6,5 @@ __pycache__
 dist
 *.egg-info
 MANIFEST
+.DS_Store
+build
