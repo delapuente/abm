@@ -40,7 +40,7 @@ Since now, you can load ``*.ini`` files as if they were modules:
 
     import config
     assert(config['example'] is not None)
-    assert(config['example']['opton'] is 'value')
+    assert(config['example']['option'] is 'value')
 
 .. note:: ``abm.loaders`` package is work in progress.
    The ``abm.loaders`` package is still work in progress and it will gather
