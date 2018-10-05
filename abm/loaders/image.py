@@ -15,10 +15,6 @@ class ImageLoader(AbmLoader):
 
     extensions = ('.jpg', '.jpeg', '.bmp', '.tiff')
 
-    def __init__(self, name, path):
-        self.name = name
-        self.path = path
-
     def create_module(self, spec):
         module = ImageModule(spec.name)
         self.init_module_attrs(spec, module)

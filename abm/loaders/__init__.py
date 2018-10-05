@@ -15,6 +15,10 @@ from abm.core import HOOK_NAME
 class AbmLoader(Loader):
     """Base class for helping implement loaders for non-python files."""
 
+    def __init__(self, name, path):
+        self.name = name
+        self.path = path
+
     @classmethod
     def init_module_attrs(cls, spec, module):
         return _init_module_attrs(spec, module)
@@ -41,13 +45,9 @@ class IniLoader(AbmLoader):
 
     extensions = ('.ini', )
 
-    def __init__(self, name, path):
-        self.module_name = name
-        self.file_path = path
-
     def exec_module(self, module):
         config_parser = ConfigParser()
-        config_parser.read(self.file_path)
+        config_parser.read(self.path)
         for section_name, section in config_parser.items():
             namespace = SimpleNamespace(**section)
             setattr(module, section_name, namespace)
@@ -77,16 +77,13 @@ class JsonLoader(AbmLoader):
 
     extensions = ('.json', )
 
-    def __init__(self, name, path):
-        self.file_path = path
-
     def create_module(self, spec):
         module = JsonModule(spec.name)
         self.init_module_attrs(spec, module)
         return module
 
     def exec_module(self, module):
-        with open(self.file_path) as jsonfile:
+        with open(self.path) as jsonfile:
             data = json.load(jsonfile)
         module._data = data
         return module

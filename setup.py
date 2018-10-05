@@ -3,7 +3,7 @@ from distutils.core import setup
 setup(
   name='abm',
   description='Allow loading non Python module formats as modules',
-  version='0.1.1',
+  version='0.1.3',
   author='Salvador de la Puente González',
   author_email='salva@unoyunodiez.com',
   url='https://github.com/delapuente/abm',
