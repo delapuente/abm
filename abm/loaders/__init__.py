@@ -19,6 +19,11 @@ class AbmLoader(Loader):
         self.name = name
         self.path = path
 
+    def reset_module(self, module):
+        spec = module.__spec__
+        module.__dict__.clear()
+        self.init_module_attrs(spec, module)
+
     @classmethod
     def init_module_attrs(cls, spec, module):
         return _init_module_attrs(spec, module)
@@ -46,6 +51,7 @@ class IniLoader(AbmLoader):
     extensions = ('.ini', )
 
     def exec_module(self, module):
+        self.reset_module(module)
         config_parser = ConfigParser()
         config_parser.read(self.path)
         for section_name, section in config_parser.items():
@@ -83,6 +89,7 @@ class JsonLoader(AbmLoader):
         return module
 
     def exec_module(self, module):
+        self.reset_module(module)
         with open(self.path) as jsonfile:
             data = json.load(jsonfile)
         module._data = data

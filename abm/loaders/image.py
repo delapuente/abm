@@ -21,6 +21,10 @@ class ImageLoader(AbmLoader):
         return module
 
     def exec_module(self, module):
+        if module._image is not None:
+            module._image.close()
+
+        self.reset_module(module)
         image = Image.open(self.path)
         module._image = image
 
