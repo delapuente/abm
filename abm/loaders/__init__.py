@@ -8,7 +8,7 @@ from configparser import ConfigParser
 # noinspection PyProtectedMember
 from importlib._bootstrap import _init_module_attrs
 from importlib.abc import Loader
-from abm.core import HOOK_NAME
+from abm.core import HOOK_NAME, PRIORITY_HOOKS, is_builtin_ext
 
 
 # noinspection PyAbstractClass
@@ -29,7 +29,7 @@ class AbmLoader(Loader):
         return _init_module_attrs(spec, module)
 
     @classmethod
-    def register(cls, extensions=None, override=False):
+    def register(cls, extensions=None, override=False, override_builtins=False):
         if not hasattr(sys, HOOK_NAME):
             raise AttributeError('sys.{} is not present, ensure you have'
                                  'enabled abm by importing `activate`.'
@@ -37,11 +37,21 @@ class AbmLoader(Loader):
 
         extensions = extensions or cls.extensions
         for extension in extensions:
+            is_builtin = is_builtin_ext(extension)
+            hooks = PRIORITY_HOOKS if is_builtin else getattr(sys, HOOK_NAME)
+            if is_builtin and not override_builtins:
+                raise ValueError('This loader seems to override one or more '
+                                 'default loaders ({}). Pass '
+                                 'override_builtins=True to override the'
+                                 'loaders for Python '
+                                 'extensions.'.format(extension))
+
             if not override and extension in sys.abm_hooks:
-                raise ValueError('Cannot set register this loader for '
+                raise ValueError('Cannot register this loader for the '
                                  'extension "{}". It is already in use.'
                                  .format(extension))
-            sys.abm_hooks[extension] = cls
+
+            hooks[extension] = cls
 
 
 class IniLoader(AbmLoader):

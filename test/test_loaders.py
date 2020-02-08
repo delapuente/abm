@@ -5,7 +5,7 @@ import unittest
 from unittest import TestCase, main
 from contextlib import suppress
 
-from abm.core import HOOK_NAME, activate as activate_abm
+from abm.core import HOOK_NAME, PRIORITY_HOOKS, activate as activate_abm
 from abm.loaders import AbmLoader, IniLoader, JsonLoader
 try:
     from abm.loaders.image import ImageLoader
@@ -22,7 +22,7 @@ class TestBaseAbmLoaderClass(TestCase):
 
     def test_register_without_activating(self):
         """Registering raises."""
-        delattr(sys, HOOK_NAME)  # deactivate abm
+        _disable_abm()
         with self.assertRaises(AttributeError):
             DummyLoader.register()
 
@@ -45,6 +45,24 @@ class TestBaseAbmLoaderClass(TestCase):
         DummyLoader.register()
         DummyLoader.register(extensions=('.example2',))
         self.assertIs(getattr(sys, HOOK_NAME)['.example2'], DummyLoader)
+
+
+class TestPyOverrideLoader(TestCase):
+    """Check base class for abm loaders."""
+
+    def setUp(self):
+        _disable_abm()
+        activate_abm()
+
+    def test_override_builtin_extension_without_explicit_flag(self):
+        """It is dangerous. Should fail."""
+        with self.assertRaises(ValueError):
+            PyLoader.register()
+
+    def test_override_builtin(self):
+        """When explicitely stated, allow overriding default loaders."""
+        PyLoader.register(override_builtins=True)
+        self.assertIs(PRIORITY_HOOKS['.py'], PyLoader)
 
 
 class TestIniLoader(TestCase):
@@ -115,10 +133,13 @@ class TestImageLoader(TestCase):
 class DummyLoader(AbmLoader):
     extensions = ('.example',)
 
+class PyLoader(AbmLoader):
+    extensions = ('.py',)
 
 def _disable_abm():
     with suppress(AttributeError):
         delattr(sys, HOOK_NAME)
+        PRIORITY_HOOKS.clear()
 
 
 if __name__ == '__main__':

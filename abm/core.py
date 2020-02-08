@@ -30,8 +30,17 @@ import sys
 from importlib.machinery import FileFinder
 from itertools import chain
 
+"""Hooks that come before the the default ones. Used for overwritting the
+default loaders. Use with caution."""
+PRIORITY_HOOKS = {}
+
+
 """The name of the property in ``sys`` used to expose ``_ABM_HOOKS``."""
 HOOK_NAME = 'abm_hooks'
+
+
+def is_builtin_ext(ext):
+    return ext in ['.py', '.pyc'] or ext[-3:] == '.so'
 
 
 def _set_loaders(self, loaders):
@@ -39,7 +48,7 @@ def _set_loaders(self, loaders):
 
 
 def _get_loaders(self):
-    return chain(self._builtin_loaders, getattr(sys, HOOK_NAME).items())
+    return chain(PRIORITY_HOOKS.items(), self._builtin_loaders, getattr(sys, HOOK_NAME).items())
 
 
 def activate():

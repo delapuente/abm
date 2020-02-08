@@ -123,6 +123,28 @@ A good tip for determining how to implement this method is imagining you
 trigger a reload of the module: the code syncing the module contents with the
 file is what you should put here.
 
+Overriding builtin extensions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Overriding builtin extensions such as ``.py``, ``.pyc`` or ``.so`` is possible
+by passing ``override_builtins=True`` to the ``register()`` method.
+
+.. code-block:: python
+
+    from abm.loaders import AbmLoader
+
+    class BreakPyModules(AbmLoader):
+
+        extensions = ('.py', )
+
+        def create_module():
+            raise NotImplementedError('Can load .py modules no more.')
+
+    BreakPythonModules.register(override_builtins=True)
+
+Use this with caution since you can break the import system.
+Not passing ``override_builtins`` results in a ``ValueError`` exception.
+
 How does it work
 ----------------
 
